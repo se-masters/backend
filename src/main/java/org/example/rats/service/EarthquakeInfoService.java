@@ -42,12 +42,40 @@ public class EarthquakeInfoService {
 
         Response info = objectMapper.readValue(urlObj, Response.class);
 
+        //테스트를 위해 대한민국에 임의의 지진 정보를 추가
+        Item item1 = new Item();
+        item1.setLoc("대한민국 금오공대 금오지");
+        item1.setLat("36.141787443678");
+        item1.setLon("128.395795435");
+        item1.setMt("5.0");
+
+        Item item2 = new Item();
+        item2.setLoc("대한민국 금오공대 운동장");
+        item2.setLat("36.146080");
+        item2.setLon("128.387574");
+        item2.setMt("3.0");
+
+        Item item3 = new Item();
+        item3.setLoc("대한민국 금오공대 옆 산골짜기");
+        item3.setLat("36.140266");
+        item3.setLon("128.386423");
+        item3.setMt("7.9");
+
+        info.getResponse().getBody().getItems().getItems().add(item1);
+        info.getResponse().getBody().getItems().getItems().add(item2);
+        info.getResponse().getBody().getItems().getItems().add(item3);
+
         return filterItems(info.getResponse().getBody().getItems().getItems());
     }
 
-    // 대한민국에 해당하는 지진 정보만 필터링
+    // 북위 33도에서 43도, 동경 124도에서 132도 사이에 있는 지진 정보만 필터링
     public List<Item> filterItems(List<Item> items) {
         return items.stream()
-                .filter(item -> item.getLoc().contains("대한민국")).collect(Collectors.toList());
+                .filter(item -> {
+                    double lat = Double.parseDouble(item.getLat());
+                    double lon = Double.parseDouble(item.getLon());
+                    return lat >= 33 && lat <= 43 && lon >= 124 && lon <= 132;
+                })
+                .collect(Collectors.toList());
     }
 }
